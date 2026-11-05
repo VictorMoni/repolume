@@ -66,7 +66,8 @@ function render(){
  const complete=repos.filter(r=>score(r)===4).length;
  $('#mode').textContent=t(demo?'demoMode':'mode');$('#profiletitle').textContent=demo?t('demoTitle'):t('profileTitle',{user});
  $('#summary').innerHTML=[[repos.length,'reviewed'],[complete,'complete'],[repos.length-complete,'attention']].map(([n,key])=>`<div class="stat"><b>${n}</b><span>${esc(t(key))}</span></div>`).join('');
- $('#count').textContent=selected.size;
+ $('#count').textContent=selected.size?String(selected.size):'';
+ $('#count').hidden=selected.size===0;
  $('#scope').textContent=[demo?t('fiction'):'',t('scope',{count:repos.length,excluded}),hasMore?t('moreAvailable'):''].filter(Boolean).join(' ');
  const loadedSelected=repos.filter(r=>selected.has(r.id)).length;
  $('#selection-note').textContent=t(storageAvailable?'selectionSaved':'selectionMemory');

@@ -1,0 +1,70 @@
+/* Visual refinement shares the accessible palettes in accessibility.css. */
+header{padding:24px 32px;gap:28px}
+header nav{gap:25px}
+.brand{font-size:25px;letter-spacing:-1.1px}
+.logo{border-radius:10px}
+.preferences{display:flex;align-items:center;gap:12px;padding-left:24px;border-left:1px solid var(--line)}
+.preference-control{display:flex;flex-direction:column;gap:5px;min-width:110px}
+.preferences label{font-size:12px;line-height:1.4;color:var(--muted);padding-left:2px}
+.preferences select{width:100%;min-width:110px;border-color:var(--control);border-radius:10px;padding:9px 12px;background:var(--surface);font-size:13px}
+.hero{padding-top:88px;padding-bottom:76px;gap:64px}
+h1{font-weight:600;letter-spacing:-2.7px;line-height:1.13}
+.intro{max-width:450px;line-height:1.85}
+.eyebrow{letter-spacing:1.8px}
+.searchbox{border-radius:14px;padding:7px;box-shadow:0 5px 20px #10291a06}
+.primary,.secondary{border-radius:10px;padding:13px 18px;font-weight:600;line-height:1.4}
+.secondary{background:var(--surface)}
+.primary{box-shadow:0 4px 12px #10291a0c}
+.primary:hover,.secondary:hover{filter:none;box-shadow:0 5px 18px #10291a14}
+.field-help{line-height:1.75}
+.steps{padding:27px 0;gap:28px}
+.steps>div>span{background:var(--surface);border-color:var(--line)}
+.steps p{line-height:1.8}
+#workspace{padding-top:60px}
+.sectionhead h2{font-size:32px;letter-spacing:-1.2px}
+.summary{gap:18px;margin:28px 0}
+.stat{border-radius:16px;background:var(--surface);padding:24px;border-color:var(--line);box-shadow:0 3px 12px #10291a04}
+.stat b{font-size:34px;letter-spacing:-1.1px;margin-bottom:8px}
+.stat span{font-size:13px;line-height:1.6}
+.workspace-guide{border-radius:18px;padding:28px;gap:28px;margin-bottom:38px}
+.workspace-guide h3{font-size:22px}
+.project-heading h3{font-size:26px}
+.selection-bar{margin-top:18px;margin-bottom:16px}
+.selection-bar button{font-size:12px;padding:10px 14px;background:transparent;box-shadow:none}
+.project-tools{border-radius:16px;background:var(--surface);padding:22px;border-color:var(--line)}
+.project-tools input{border-radius:10px;padding:12px 14px}
+.project-tools .field-help{font-size:12px}
+.advanced-filters{border:0;margin-bottom:5px}
+.advanced-filters summary{font-size:13px}
+.toolbar{margin:18px 0 24px}
+.filters{display:inline-flex;gap:5px;flex-wrap:wrap;background:var(--subtle);padding:5px;border:1px solid var(--line);border-radius:14px}
+.filters button{background:transparent;border-color:transparent;border-radius:10px;padding:10px 15px;color:var(--muted);display:inline-flex;gap:8px;align-items:center;font-weight:500}
+.filters button:hover{filter:none;color:var(--ink);background:var(--surface)}
+.filters button[aria-pressed=true]{background:var(--green);border-color:var(--green);color:var(--on-accent);box-shadow:0 2px 5px #10291a10}
+#count{display:inline-flex;justify-content:center;align-items:center;min-width:23px;height:23px;padding:0 6px;border:1px solid currentColor;border-radius:7px;font-size:11px;font-weight:700;line-height:1}
+.cards{gap:22px;align-items:stretch}
+.card{border-radius:18px;padding:25px;box-shadow:0 4px 16px #10291a05;transition:border-color .15s,box-shadow .15s}
+.card:hover{border-color:var(--control);box-shadow:0 8px 24px #10291a0b}
+.card.selected{background:var(--surface);border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green),0 4px 16px #10291a05}
+.cardhead{align-items:start;gap:14px}
+.card h3{font-size:19px;line-height:1.5;font-weight:600}
+.card p{line-height:1.8;margin-top:14px}
+.score{font-size:12px;border-radius:8px;padding:6px 9px}
+.meta{line-height:1.7;gap:5px 12px;font-size:11px}
+.next-label{font-size:10px!important;letter-spacing:1.4px;margin:19px 0 7px!important}
+.card .tip{font-size:14px!important;margin-top:0;margin-bottom:20px}
+.metadata-details summary,.readme-details summary{font-size:13px}
+.cardbottom{gap:10px;margin-top:auto;padding-top:8px}
+.cardbottom .select,.cardbottom a{font-size:12px}
+.cardbottom .generate-readme{background:var(--subtle);border-color:var(--line);font-size:13px;margin-top:10px}
+.cardbottom .generate-readme:hover{border-color:var(--green);color:var(--green);box-shadow:none}
+.priority-panel{border-radius:18px;padding:28px;margin-top:40px}
+dialog{border-radius:20px;box-shadow:0 25px 80px #0005;padding:34px}
+dialog::backdrop{background:#10221899;backdrop-filter:blur(4px)}
+.draft-fields input,.draft-fields textarea,.draft-fields select,#draft-output{border-radius:10px}
+.bottom{padding:75px 0}
+footer{padding-top:26px;padding-bottom:26px}
+@media(max-width:1100px){header{gap:20px}header nav{gap:18px}.preferences{padding-left:18px}.hero{gap:38px}}
+@media(max-width:850px){header{align-items:center}header nav{justify-content:flex-end}.preferences{gap:10px;padding-left:14px}.preference-control{min-width:100px}.preferences select{min-width:100px}.hero{padding-top:58px;padding-bottom:48px}.download-area{max-width:340px}.cards{gap:18px}.card{padding:22px}}
+@media(max-width:620px){header{padding:22px;gap:17px}header nav{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;justify-items:start}header nav .text{justify-self:end;font-size:12px}header nav a{font-size:12px}.preferences{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;padding:15px 0 0;border-left:0;border-top:1px solid var(--line);width:100%}.preference-control{min-width:0;width:100%;gap:6px}.preferences select{min-width:0;width:100%;font-size:14px}.preferences label{font-size:12px}.hero{padding-top:38px;padding-bottom:30px;gap:24px}h1{letter-spacing:-1.6px;line-height:1.16}.intro{line-height:1.8}.steps{gap:22px;padding:25px 0}#workspace{padding-top:36px}.sectionhead h2{font-size:27px}.summary{gap:8px;margin:22px 0}.stat{padding:17px 10px;border-radius:13px}.stat b{font-size:27px}.stat span{font-size:12px}.workspace-guide{padding:22px;border-radius:15px;gap:18px}.project-heading h3{font-size:24px}.project-tools{padding:17px;border-radius:14px}.filters{gap:3px;padding:4px;max-width:100%}.filters button{padding:10px 12px;font-size:12px}.card{border-radius:16px;padding:22px}.priority-panel{padding:22px;border-radius:16px}.bottom{padding:52px 0}dialog{padding:24px}}
+@media(forced-colors:active){.filters button{border:1px solid ButtonText}.card.selected{outline:2px solid Highlight}.preferences select{border-color:ButtonText}}
