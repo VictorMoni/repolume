@@ -31,11 +31,11 @@ Open http://127.0.0.1:4173.
 npm test
 ```
 
-The 17 tests cover translations, contrast tokens, README analysis, template generation, combined filters and saved selections.
+The 23 tests cover translations, contrast tokens, README analysis, template generation, combined filters and saved selections.
 
 ## Deploy to Vercel
 
-Import this repository as a Vercel project. The included `vercel.json` sets the output directory to `dist`, with no install or build command. No environment variables or secrets are needed. Keep the repository root as the Root Directory. The requested production domain is `repolume.vercel.app`, subject to availability.
+Import this repository as a Vercel project. The included `vercel.json` sets the output directory to `dist`, with no install or build command. No environment variables or secrets are needed. Keep the repository root as the Root Directory. Production is available at https://repolume-review.vercel.app.
 
 ## How the review works
 

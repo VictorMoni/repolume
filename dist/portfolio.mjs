@@ -18,3 +18,18 @@ export function loadSelection(storage,user,demo=false){
 export function saveSelection(storage,user,ids,demo=false){
  try{if(!storage)return false;storage.setItem(selectionKey(user,demo),JSON.stringify([...ids]));return true;}catch{return false;}
 }
+// Keep a page-session copy even when browser storage cannot be written.
+export function createSelectionSession(storage){
+ const memory=new Map();
+ return {
+  load(user,demo=false){
+   const key=selectionKey(user,demo);
+   if(!memory.has(key))memory.set(key,loadSelection(storage,user,demo));
+   const value=memory.get(key);return {ids:new Set(value.ids),available:value.available};
+  },
+  save(user,ids,demo=false){
+   const available=saveSelection(storage,user,ids,demo);
+   memory.set(selectionKey(user,demo),{ids:new Set(ids),available});return available;
+  }
+ };
+}

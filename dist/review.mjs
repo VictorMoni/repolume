@@ -8,11 +8,11 @@ export const sections = [
 const normalize=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 // Heuristic: recognize section titles, never claims about semantic correctness.
 export function analyzeReadme(text){
- const lines=text.replace(/<!--[\s\S]*?-->/g,'').split(/\r?\n/);
+ const lines=text.replace(/<!--[\s\S]*?-->/g,'').replace(/<(pre|code)\b[^>]*>[\s\S]*?<\/\1\s*>/gi,'').split(/\r?\n/);
  let fence=null;const clean=[];
  for(const line of lines){
-  const mark=line.match(/^\s{0,3}(`{3,}|~{3,})/);
-  if(mark){if(!fence)fence=mark[1];else if(mark[1][0]===fence[0]&&mark[1].length>=fence.length)fence=null;clean.push('');continue;}
+  const mark=line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+  if(mark){if(!fence)fence=mark[1];else if(mark[1][0]===fence[0]&&mark[1].length>=fence.length&&mark[2].trim()==='')fence=null;clean.push('');continue;}
   clean.push(fence?'':line);
  }
  const headings=[];
@@ -22,7 +22,7 @@ export function analyzeReadme(text){
   if(i&&/^\s{0,3}(?:={3,}|-{3,})\s*$/.test(line)&&clean[i-1].trim())headings.push(clean[i-1].trim());
  });
  const html=clean.join('\n');
- for(const h of html.matchAll(/<h[1-6]\b[^>]*>([\s\S]*?)<\/h[1-6]>/gi))headings.push(h[1].replace(/<[^>]+>/g,''));
+ for(const h of html.matchAll(/<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1>/gi))headings.push(h[2].replace(/<[^>]+>/g,''));
  return sections.map(s=>({...s,found:headings.some(h=>s.pattern.test(normalize(h)))}));
 }
 export function decodeReadme(data){

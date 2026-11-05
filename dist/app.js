@@ -1,4 +1,5 @@
-import {filterProjects,loadSelection,saveSelection} from './portfolio.mjs';
+import {filterProjects,createSelectionSession} from './portfolio.mjs';
+import {githubRequest as api} from './api.mjs';
 import {makeReadme} from './readme.mjs';
 import {analyzeReadme,decodeReadme,priorities} from './review.mjs';
 import {translate,localizeTask,locales,localeTags} from './i18n.mjs';
@@ -10,8 +11,9 @@ let lang=saved('repolume-language','pt',locales);
 let repos=[],selected=new Set(),filter='all',page=1,user='',demo=false,busy=false,hasMore=false,excluded=0;
 let storageAvailable=true;
 function storage(){try{return localStorage;}catch{return null;}}
-function restoreSelection(){const result=loadSelection(storage(),user,demo);selected=result.ids;storageAvailable=result.available;}
-function storeSelection(){storageAvailable=saveSelection(storage(),user,selected,demo);}
+const selectionSession=createSelectionSession(storage());
+function restoreSelection(){const result=selectionSession.load(user,demo);selected=result.ids;storageAvailable=result.available;}
+function storeSelection(){storageAvailable=selectionSession.save(user,selected,demo);}
 function resetProjectFilters(){filter='all';$('#project-query').value='';$('#project-language').value='*';}
 function refreshLanguages(){const current=$('#project-language').value||'*';const languages=[...new Set(repos.map(r=>r.language).filter(Boolean))].sort((a,b)=>a.localeCompare(b,localeTags[lang]));$('#project-language').innerHTML='<option value="*">'+esc(t('allLanguages'))+'</option>'+languages.map(value=>'<option value="'+esc(value)+'">'+esc(value)+'</option>').join('')+(repos.some(r=>!r.language)?'<option value="__none">'+esc(t('noLanguage'))+'</option>':'');$('#project-language').value=[...$('#project-language').options].some(o=>o.value===current)?current:'*';}
 let statusKey='',statusParams={},lastError=null,formInvalid=false;
@@ -85,17 +87,6 @@ function render(){
  if($('#results-status').textContent!==resultText)$('#results-status').textContent=resultText;
  syncFilters();
 }
-class ApiError extends Error{constructor(key,params={}){super(key);this.key=key;this.params=params;}}
-async function api(endpoint,optional=false){
- const response=await fetch(`https://api.github.com${endpoint}`,{headers:{Accept:'application/vnd.github+json'},signal:AbortSignal.timeout(20000)});
- if(optional&&response.status===404)return null;
- if(!response.ok){
-  if(response.status===404)throw new ApiError('notFound');
-  if(response.status===403||response.status===429)throw new ApiError('rateLimit',{reset:Number(response.headers.get('x-ratelimit-reset'))});
-  throw new ApiError('httpError',{code:response.status});
- }
- return response.json();
-}
 function showError(error){
  lastError=error;const key=error.key||(error.name==='TimeoutError'?'timeout':'network');
  const retry=error.params?.reset?t('retryAfter',{time:new Date(error.params.reset*1000).toLocaleTimeString(localeTags[lang],{hour:'2-digit',minute:'2-digit'})}):'';
@@ -141,7 +132,7 @@ $('#export').addEventListener('click',()=>{
 // Search and filtering never change the selection or export scope.
 $('#project-query').addEventListener('input',render);$('#project-language').addEventListener('change',render);
 $('#reset-filters').addEventListener('click',()=>{resetProjectFilters();render();$('#project-query').focus();});
-$('#clear-selection').addEventListener('click',()=>{selected.clear();storeSelection();render();$('#global-status').textContent=t('selectionCleared');document.querySelector('[data-filter="all"]').focus();});
+$('#clear-selection').addEventListener('click',()=>{selected.clear();if(filter==='selected')filter='all';storeSelection();render();$('#global-status').textContent=t('selectionCleared');document.querySelector(`[data-filter="${filter}"]`).focus();});
 let generatorRepo=null,generatorOpener=null;
 function downloadText(text,name){const url=URL.createObjectURL(new Blob([text],{type:'text/markdown;charset=utf-8'}));const link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function updateDraft(){if(!generatorRepo)return;const fields={};for(const key of ['title','description','objective','installation','usage','technologies'])fields[key]=$('#draft-'+key).value;$('#draft-output').value=makeReadme(generatorRepo,fields,$('#draft-language').value);$('#draft-output').lang=localeTags[$('#draft-language').value];$('#draft-status').textContent=t('draftUpdated');}
