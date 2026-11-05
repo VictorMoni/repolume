@@ -1,0 +1,12 @@
+{
+  "name": "repolume",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Review public GitHub portfolios and generate editable README drafts.",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "start": "node scripts/serve.mjs",
+    "test": "node --test tests/review.test.mjs tests/i18n.test.mjs tests/portfolio.test.mjs"
+  },
+  "engines": {"node": ">=22"}
+}
