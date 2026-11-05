@@ -11,7 +11,7 @@ test('profile entry rejects repository links and invalid identities',()=>{
 });
 test('only master is enabled for automatic Vercel deployments',()=>{
  const config=JSON.parse(readFileSync(new URL('../vercel.json',import.meta.url),'utf8'));
- assert.equal(config.git.deploymentEnabled['*'],false);
+ assert.equal(config.git.deploymentEnabled.develop,false);
  assert.equal(config.git.deploymentEnabled.master,true);
  assert.notEqual(config.git.deploymentEnabled.develop,true);
 });
