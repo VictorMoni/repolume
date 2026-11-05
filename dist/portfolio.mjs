@@ -1,4 +1,11 @@
 const normalize=value=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase();
+export function normalizeGithubUser(input){
+ let value=String(input??'').trim();
+ if(/^(?:https?:\/\/)?github\.com\//i.test(value)){
+  try{const url=new URL(/^https?:/i.test(value)?value:'https://'+value);if(url.hostname!=='github.com'||url.username||url.password)return null;const parts=url.pathname.split('/').filter(Boolean);if(parts.length!==1)return null;value=parts[0];}catch{return null;}
+ }else value=value.replace(/^@/,'');
+ return /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$/.test(value)&&!value.includes('--')?value:null;
+}
 export function filterProjects(repos,{query='',language='*',filter='all',selected=new Set(),hasPending=()=>false}={}){
  const terms=normalize(query).trim().split(/\s+/).filter(Boolean);
  return repos.filter(repo=>{

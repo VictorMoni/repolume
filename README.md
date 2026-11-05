@@ -31,7 +31,7 @@ Open http://127.0.0.1:4173.
 npm test
 ```
 
-The 23 tests cover translations, contrast tokens, README analysis, template generation, combined filters and saved selections.
+The 26 tests cover translations, contrast tokens, README analysis, template generation, combined filters and saved selections.
 
 ## Deploy to Vercel
 
@@ -60,3 +60,11 @@ Repolume is an independent integration with the GitHub API. It does not grant or
 ## License
 
 No open-source license has been selected yet. A public repository does not itself grant a license to reuse its code.
+
+## Branch workflow
+
+Only `master` and `develop` are maintained. Use `develop` for development and validation. Promote validated changes to `master` for production. Vercel production follows `master`; `vercel.json` disables automatic deployments from other branches, including `develop`.
+
+## Guided experience
+
+Paste a GitHub profile URL, enter a username or use an @handle. After analysis, a next-step guide leads to project selection. Each card highlights the next improvement; metadata and README details are expandable. Additional filters and sorting are grouped together. The download button states whether it exports all loaded projects or only the selected ones and shows the count. Improvement recommendations follow the project cards.

@@ -1,4 +1,4 @@
-import {filterProjects,createSelectionSession} from './portfolio.mjs';
+import {filterProjects,createSelectionSession,normalizeGithubUser} from './portfolio.mjs';
 import {githubRequest as api} from './api.mjs';
 import {makeReadme} from './readme.mjs';
 import {analyzeReadme,decodeReadme,priorities} from './review.mjs';
@@ -61,6 +61,7 @@ function render(){
  // Restore the active control after list updates. Without this, keyboard selection loses focus.
  const active=document.activeElement;
  const activeId=active?.matches('[data-id]')?active.dataset.id:null;
+ const openMetadata=new Set([...document.querySelectorAll('[data-meta-id][open]')].map(el=>el.dataset.metaId));
  const openDetails=new Set([...document.querySelectorAll('[data-readme-id][open]')].map(el=>el.dataset.readmeId));
  const complete=repos.filter(r=>score(r)===4).length;
  $('#mode').textContent=t(demo?'demoMode':'mode');$('#profiletitle').textContent=demo?t('demoTitle'):t('profileTitle',{user});
@@ -71,6 +72,10 @@ function render(){
  $('#selection-note').textContent=t(storageAvailable?'selectionSaved':'selectionMemory');
  $('#selection-pending').hidden=selected.size===loadedSelected;$('#selection-pending').textContent=t('selectionPending',{count:selected.size-loadedSelected});
  $('#clear-selection').disabled=selected.size===0;
+ $('#export').textContent=t(selected.size?'downloadSelected':'downloadAll',{count:selected.size?loadedSelected:repos.length});
+ $('#download-help').textContent=t(selected.size?'downloadHelpSelected':'downloadHelpAll',{count:selected.size?loadedSelected:repos.length});
+ $('#guide-help').textContent=t(loadedSelected?'guideSelected':'guideChoose',{count:loadedSelected});
+ $('#choose-projects').textContent=t(loadedSelected?'reviewPlan':'chooseProjects');
  refreshLanguages();
  $('#more').hidden=!hasMore||demo;$('#more').disabled=busy;$('#export').disabled=!repos.length||busy||(selected.size>0&&!loadedSelected);
  $('#analyze').disabled=busy;$('#demo').disabled=busy;$('#search').setAttribute('aria-busy',String(busy));
@@ -79,8 +84,9 @@ function render(){
  const list=filterProjects(searchable,{query:$('#project-query').value,language:$('#project-language').value,filter,selected,hasPending:r=>priorities(r).length>0}).sort((a,b)=>$('#sort').value==='name'?a.name.localeCompare(b.name,localeTags[lang]):$('#sort').value==='updated'?new Date(b.updated_at)-new Date(a.updated_at):score(b)-score(a)||a.name.localeCompare(b.name,localeTags[lang]));
  $('#cards').innerHTML=list.map(r=>{
   const c=checks(r),unknown=c.some(v=>v===null),first=tasks(r)[0];
-  return `<article class="card ${selected.has(r.id)?'selected':''}" aria-labelledby="repo-${r.id}"><div class="cardhead"><h3 id="repo-${r.id}">${external(path(r),r.name+' ↗')}</h3><span class="score">${score(r)}/4${unknown?' · ?':''}</span></div><p>${esc(r.demoDescription?t(r.demoDescription):r.description||t('noDescription'))}</p><div class="meta"><span>● ${esc(r.language||t('noLanguage'))}</span><span>${esc(t('updated',{date:date(r.updated_at)}))}</span></div><ul class="checks">${c.map((v,i)=>`<li><span>${esc(t(labels[i]))}</span><span class="${v===true?'yes':v===false?'no':'unknown'}">${esc(v===true?'✓ '+t('present'):v===false?'＋ '+t('add'):'? '+t('unverified'))}</span></li>`).join('')}</ul><p class="tip">${esc(first?first.action:t('goodBase'))}</p>${reviewDetails(r)}<div class="cardbottom"><label class="select"><input type="checkbox" data-id="${r.id}" aria-label="${esc(t('highlightProject',{name:r.name}))}" ${selected.has(r.id)?'checked':''}>${esc(t('highlight'))}</label>${external(path(r),t('viewGithub'),t('viewGithub')+' — '+r.name)}<button class="secondary generate-readme" data-generate="${r.id}" aria-haspopup="dialog" aria-label="${esc(t('generateFor',{name:r.name}))}">${esc(t('generateReadme'))}</button></div></article>`;
+  return `<article class="card ${selected.has(r.id)?'selected':''}" aria-labelledby="repo-${r.id}"><div class="cardhead"><h3 id="repo-${r.id}">${external(path(r),r.name+' ↗')}</h3><span class="score">${score(r)}/4${unknown?' · ?':''}</span></div><p>${esc(r.demoDescription?t(r.demoDescription):r.description||t('noDescription'))}</p><div class="meta"><span>● ${esc(r.language||t('noLanguage'))}</span><span>${esc(t('updated',{date:date(r.updated_at)}))}</span></div><details class="metadata-details" data-meta-id="${r.id}"><summary>${esc(t('metadataDetails'))} · ${score(r)}/4</summary><ul class="checks">${c.map((v,i)=>`<li><span>${esc(t(labels[i]))}</span><span class="${v===true?'yes':v===false?'no':'unknown'}">${esc(v===true?'✓ '+t('present'):v===false?'＋ '+t('add'):'? '+t('unverified'))}</span></li>`).join('')}</ul></details><p class="next-label">${esc(t('nextImprovement'))}</p><p class="tip">${esc(first?first.action:t('goodBase'))}</p>${reviewDetails(r)}<div class="cardbottom"><label class="select"><input type="checkbox" data-id="${r.id}" aria-label="${esc(t('highlightProject',{name:r.name}))}" ${selected.has(r.id)?'checked':''}>${esc(t('highlight'))}</label>${external(path(r),t('viewGithub'),t('viewGithub')+' — '+r.name)}<button class="secondary generate-readme" data-generate="${r.id}" aria-haspopup="dialog" aria-label="${esc(t('generateFor',{name:r.name}))}">${esc(t('generateReadme'))}</button></div></article>`;
  }).join('')||`<p class="empty">${esc(t($('#project-query').value.trim()||$('#project-language').value!=='*'?'emptySearch':filter==='selected'?'emptySelected':filter==='pending'?'emptyPending':'emptyAll'))}</p>`;
+ document.querySelectorAll('[data-meta-id]').forEach(el=>{el.open=openMetadata.has(el.dataset.metaId);});
  document.querySelectorAll('[data-readme-id]').forEach(el=>{el.open=openDetails.has(el.dataset.readmeId);});
  if(activeId){const restored=document.querySelector(`[data-id="${activeId}"]`);if(restored)restored.focus({preventScroll:true});else document.querySelector(`[data-filter="${filter}"]`).focus({preventScroll:true});}
  const resultText=t('results',{count:list.length,selected:loadedSelected});
@@ -112,7 +118,7 @@ async function load(more=false){
 function syncFilters(){document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.filter===filter)));}
 function clearValidation(){formInvalid=false;$('#username').removeAttribute('aria-invalid');$('#form-error').hidden=true;}
 $('#username').addEventListener('input',clearValidation);
-$('#search').addEventListener('submit',event=>{event.preventDefault();const field=$('#username');field.value=field.value.trim();if(!/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$/.test(field.value)){formInvalid=true;field.setAttribute('aria-invalid','true');$('#form-error').textContent=t('invalid');$('#form-error').hidden=false;field.focus();return;}clearValidation();load();});
+$('#search').addEventListener('submit',event=>{event.preventDefault();const field=$('#username');const normalized=normalizeGithubUser(field.value);if(!normalized){formInvalid=true;field.setAttribute('aria-invalid','true');$('#form-error').textContent=t('invalid');$('#form-error').hidden=false;field.focus();return;}field.value=normalized;clearValidation();load();});
 $('#more').addEventListener('click',()=>load(true));$('#sort').addEventListener('change',render);
 document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{filter=button.dataset.filter;render();}));
 $('#cards').addEventListener('change',event=>{if(!event.target.matches('[data-id]'))return;const id=Number(event.target.dataset.id);event.target.checked?selected.add(id):selected.delete(id);storeSelection();render();});
@@ -137,8 +143,9 @@ let generatorRepo=null,generatorOpener=null;
 function downloadText(text,name){const url=URL.createObjectURL(new Blob([text],{type:'text/markdown;charset=utf-8'}));const link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function updateDraft(){if(!generatorRepo)return;const fields={};for(const key of ['title','description','objective','installation','usage','technologies'])fields[key]=$('#draft-'+key).value;$('#draft-output').value=makeReadme(generatorRepo,fields,$('#draft-language').value);$('#draft-output').lang=localeTags[$('#draft-language').value];$('#draft-status').textContent=t('draftUpdated');}
 $('#cards').addEventListener('click',event=>{const button=event.target.closest('[data-generate]');if(!button)return;generatorRepo=repos.find(r=>r.id===Number(button.dataset.generate));if(!generatorRepo)return;generatorOpener=generatorRepo.id;$('#generator-project').textContent=generatorRepo.owner.login+'/'+generatorRepo.name;$('#draft-language').value=lang;$('#draft-title').value=generatorRepo.name;$('#draft-description').value=generatorRepo.demoDescription?t(generatorRepo.demoDescription):generatorRepo.description||'';$('#draft-technologies').value=generatorRepo.language||'';for(const field of ['objective','installation','usage'])$('#draft-'+field).value='';updateDraft();$('#generator').showModal();});
-$('#draft-update').addEventListener('click',updateDraft);
+$('#draft-update').addEventListener('click',()=>{updateDraft();$('#draft-output').focus();$('#draft-output').scrollIntoView({behavior:reduceMotion()?'instant':'smooth',block:'center'});});
 $('#generator-close').addEventListener('click',()=>$('#generator').close());
 $('#generator').addEventListener('close',()=>{document.querySelector('[data-generate="'+generatorOpener+'"]')?.focus();if(!document.querySelector('[data-generate="'+generatorOpener+'"]'))$('#profiletitle').focus();$('#draft-output').value='';generatorRepo=null;});
 $('#draft-download').addEventListener('click',()=>{const text=$('#draft-output').value;if(!text.trim()){$('#draft-status').textContent=t('emptyDraft');$('#draft-output').focus();return;}downloadText(text,'README.md');$('#draft-status').textContent=t('draftDownloaded');});
+$('#choose-projects').addEventListener('click',()=>{resetProjectFilters();filter=repos.some(r=>selected.has(r.id))?'selected':'all';render();$('#projects-title').focus({preventScroll:true});$('#projects-title').scrollIntoView({behavior:reduceMotion()?'instant':'smooth',block:'start'});});
 applyLanguage();
